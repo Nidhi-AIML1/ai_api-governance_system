@@ -1,0 +1,171 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+
+.sidebar {
+  width: 240px;
+  background: #111827;
+  color: white;
+  padding: 25px 15px;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 40px;
+  padding-left: 10px;
+}
+
+.nav-item {
+  padding: 13px 15px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #cbd5e1;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* Main Content */
+
+.main-content {
+  flex: 1;
+  padding: 30px;
+}
+
+/* Header */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.header h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.header p {
+  color: #6b7280;
+}
+
+.profile {
+  background: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+/* Dashboard */
+
+.dashboard h2 {
+  margin-bottom: 20px;
+}
+
+/* Cards */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.card p {
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.card h3 {
+  font-size: 28px;
+}
+
+/* Charts */
+
+.chart-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.chart-box {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  min-height: 280px;
+}
+
+.chart-box h3 {
+  margin-bottom: 25px;
+}
+
+.placeholder {
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  color: #9ca3af;
+  border-radius: 8px;
+}
+
+/* Table */
+
+.table-section {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.table-section h3 {
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 15px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+td {
+  font-size: 14px;
+}
