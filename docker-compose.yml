@@ -1,0 +1,34 @@
+name: governance-engine
+
+services:
+  backend:
+    build: ./backend
+    container_name: governance-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./backend/.env      # Claude API key yahan se aati hai (file na ho to koi dikkat nahi)
+        required: false
+    volumes:
+      - governance-data:/data     # database yahan safe rehta hai
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: governance-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  governance-data:
+  

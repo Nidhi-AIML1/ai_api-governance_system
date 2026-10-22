@@ -1,0 +1,30 @@
+{
+  "payment_latency_spike_1": {
+    "service": "payment-service",
+    "type": "latency_spike",
+    "start_utc": "2026-10-10T04:33:00+00:00",
+    "end_utc": "2026-10-10T05:03:00+00:00",
+    "description": "Avg response time spiked to ~800ms (5x baseline)"
+  },
+  "payment_latency_spike_2": {
+    "service": "payment-service",
+    "type": "latency_spike",
+    "start_utc": "2026-10-13T21:21:00+00:00",
+    "end_utc": "2026-10-13T21:51:00+00:00",
+    "description": "Avg response time spiked to ~900ms (6x baseline)"
+  },
+  "inventory_error_spike": {
+    "service": "inventory-service",
+    "type": "error_rate_spike",
+    "start_utc": "2026-10-12T11:45:00+00:00",
+    "end_utc": "2026-10-12T12:15:00+00:00",
+    "description": "Error rate jumped to ~45% (normal ~2%)"
+  },
+  "order_slow_response": {
+    "service": "order-service",
+    "type": "slow_response",
+    "start_utc": "2026-10-13T14:09:00+00:00",
+    "end_utc": "2026-10-13T14:39:00+00:00",
+    "description": "Avg response time spiked to ~600ms (5x baseline)"
+  }
+}
