@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { BarChart3, Brain, Inbox, Network, RefreshCw, Scale, Sparkles } from "lucide-react";
 import { api, fmtDate, isRealService, pickInterval } from "./api.js";
 import {
   AiPage,
@@ -267,7 +268,7 @@ export default function App() {
                 setRefreshKey((k) => k + 1);
               }}
             >
-              <span className={refreshing ? "spin" : ""}>↻</span> {refreshing ? "Refreshing..." : "Refresh"}
+              <RefreshCw size={16} className={refreshing ? "spin" : ""} /> {refreshing ? "Refreshing..." : "Refresh"}
             </button>
           </div>
         </header>
@@ -288,12 +289,12 @@ export default function App() {
 
             <Pipeline
               steps={[
-                { icon: "📥", tag: "Collect", title: "Logs collected", value: summary ? summary.total_requests : null, unit: "calls", color: "linear-gradient(135deg,#6366f1,#8b5cf6)" },
-                { icon: "📊", tag: "Monitor", title: "Services monitored", value: realHealth.length, unit: "services", color: "linear-gradient(135deg,#06b6d4,#3b82f6)" },
-                { icon: "🕸️", tag: "Map", title: "Links mapped", value: graphData.edges.length, unit: "links", color: "linear-gradient(135deg,#10b981,#06b6d4)" },
-                { icon: "🧠", tag: "Detect", title: "Anomalies detected", value: realAnomalies.length, unit: "by ML", color: "linear-gradient(135deg,#f59e0b,#f97316)" },
-                { icon: "✨", tag: "Advise", title: "AI advice", value: recCount, unit: "generated", color: "linear-gradient(135deg,#ec4899,#8b5cf6)" },
-                { icon: "⚖️", tag: "Govern", title: "Governance issues", value: govReport && govReport.scan ? govReport.scan.summary.total_findings : null, unit: "found", color: "linear-gradient(135deg,#0ea5e9,#6366f1)" },
+                { icon: Inbox, tag: "Collect", title: "Logs collected", value: summary ? summary.total_requests : null, unit: "calls", color: "linear-gradient(135deg,#6366f1,#8b5cf6)" },
+                { icon: BarChart3, tag: "Monitor", title: "Services monitored", value: realHealth.length, unit: "services", color: "linear-gradient(135deg,#06b6d4,#3b82f6)" },
+                { icon: Network, tag: "Map", title: "Links mapped", value: graphData.edges.length, unit: "links", color: "linear-gradient(135deg,#10b981,#06b6d4)" },
+                { icon: Brain, tag: "Detect", title: "Anomalies detected", value: realAnomalies.length, unit: "by ML", color: "linear-gradient(135deg,#f59e0b,#f97316)" },
+                { icon: Sparkles, tag: "Advise", title: "AI advice", value: recCount, unit: "generated", color: "linear-gradient(135deg,#ec4899,#8b5cf6)" },
+                { icon: Scale, tag: "Govern", title: "Governance issues", value: govReport && govReport.scan ? govReport.scan.summary.total_findings : null, unit: "found", color: "linear-gradient(135deg,#0ea5e9,#6366f1)" },
               ]}
             />
 

@@ -15,7 +15,18 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  Activity, AlertTriangle, Archive, BarChart3, Bot, Boxes, Brain, FileQuestion, FileText, Gauge, Globe,
+  Inbox, LayoutDashboard, Lightbulb, ListChecks, Lock, Network, Play, ScanSearch, Scale, Search,
+  Send, ServerCrash, ShieldCheck, Sparkles, Timer, Wrench,
+} from "lucide-react";
 import { fmtAxis, fmtDateTime, num, parseUtc, pct } from "./api.js";
+
+// ---- Yahan apna naam aur logo badlo (sirf ye 4 lines) ----
+const APP_NAME = "Governance Engine";
+const APP_TAGLINE = "API and microservice monitoring";
+const MADE_BY = "Python FastAPI, scikit-learn, React";
+const LOGO_IMAGE = ""; // jaise "/logo.png" (file frontend/public folder mein rakho). Khali chhodo to shield icon dikhega
 
 const STATUS_COLORS = {
   Healthy: { fill: "#dcfce7", stroke: "#10b981" },
@@ -50,7 +61,7 @@ export function Explain({ title = "What am I looking at?", children }) {
   return (
     <details className="explain" open>
       <summary>
-        <span className="bulb">💡</span> {title}
+        <span className="bulb"><Lightbulb size={17} /></span> {title}
       </summary>
       <div className="explain-body">{children}</div>
     </details>
@@ -78,28 +89,34 @@ function Panel({ title, desc, right, children, className = "" }) {
 /* Sidebar (left menu)                                                 */
 /* ================================================================== */
 export const NAV = [
-  { key: "overview", icon: "🏠", label: "Overview" },
-  { key: "monitoring", icon: "📈", label: "Monitoring" },
-  { key: "graph", icon: "🕸️", label: "Dependencies" },
-  { key: "governance", icon: "⚖️", label: "API Governance" },
-  { key: "ai", icon: "🤖", label: "Anomalies and AI" },
+  { key: "overview", icon: LayoutDashboard, label: "Overview" },
+  { key: "monitoring", icon: Activity, label: "Monitoring" },
+  { key: "graph", icon: Network, label: "Dependencies" },
+  { key: "governance", icon: Scale, label: "API Governance" },
+  { key: "ai", icon: Brain, label: "Anomalies and AI" },
 ];
 
 export function Sidebar({ page, onNavigate, connected, dataText }) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-logo">🛡️</div>
+        <div className="brand-logo">
+          {LOGO_IMAGE ? (
+            <img src={LOGO_IMAGE} alt="logo" style={{ width: "100%", height: "100%", borderRadius: 14, objectFit: "cover" }} />
+          ) : (
+            <ShieldCheck size={24} color="#fff" />
+          )}
+        </div>
         <div>
-          <div className="brand-name">Governance Engine</div>
-          <div className="brand-sub">API and microservice monitoring</div>
+          <div className="brand-name">{APP_NAME}</div>
+          <div className="brand-sub">{APP_TAGLINE}</div>
         </div>
       </div>
 
       <nav className="nav">
         {NAV.map((n) => (
           <button key={n.key} className={"nav-item" + (page === n.key ? " active" : "")} onClick={() => onNavigate(n.key)}>
-            <span className="nav-icon">{n.icon}</span>
+            <span className="nav-icon"><n.icon size={19} /></span>
             <span className="nav-label">{n.label}</span>
           </button>
         ))}
@@ -111,7 +128,7 @@ export function Sidebar({ page, onNavigate, connected, dataText }) {
           {connected ? "Backend connected" : "Backend offline"}
         </div>
         {dataText && <div className="side-note">{dataText}</div>}
-        <div className="side-note">Python FastAPI, scikit-learn, React</div>
+        <div className="side-note">{MADE_BY}</div>
       </div>
     </aside>
   );
@@ -125,7 +142,7 @@ export function Pipeline({ steps }) {
     <div className="pipeline">
       {steps.map((s, i) => (
         <div className="pipe-step" key={s.title}>
-          <div className="pipe-icon" style={{ background: s.color }}>{s.icon}</div>
+          <div className="pipe-icon" style={{ background: s.color }}><s.icon size={22} color="#fff" /></div>
           <div>
             <div className="pipe-tag">{s.tag}</div>
             <div className="pipe-title">{s.title}</div>
@@ -147,11 +164,13 @@ export function StatCards({ summary, serviceCount, anomalyCount }) {
         <div className="label">Services</div>
         <div className="value"><CountUp value={serviceCount} /></div>
         <div className="hint">monitored</div>
+        <Boxes className="stat-ico" size={46} />
       </div>
       <div className="card stat">
         <div className="label">Total requests</div>
         <div className="value"><CountUp value={summary ? summary.total_requests : null} /></div>
         <div className="hint">API calls logged</div>
+        <Send className="stat-ico" size={46} />
       </div>
       <div className="card stat">
         <div className="label">Error rate</div>
@@ -159,6 +178,7 @@ export function StatCards({ summary, serviceCount, anomalyCount }) {
           <CountUp value={summary ? summary.overall_error_rate * 100 : null} format={(x) => x.toFixed(2) + "%"} />
         </div>
         <div className="hint">status 500 and above</div>
+        <AlertTriangle className="stat-ico" size={46} />
       </div>
       <div className="card stat">
         <div className="label">Avg response time</div>
@@ -166,11 +186,13 @@ export function StatCards({ summary, serviceCount, anomalyCount }) {
           <CountUp value={summary ? summary.overall_avg_response_time_ms : null} format={(x) => Math.round(x) + " ms"} />
         </div>
         <div className="hint">all services</div>
+        <Timer className="stat-ico" size={46} />
       </div>
       <div className="card stat">
         <div className="label">Anomalies found</div>
         <div className="value"><CountUp value={anomalyCount} /></div>
         <div className="hint">by the ML model</div>
+        <ScanSearch className="stat-ico" size={46} />
       </div>
     </div>
   );
@@ -702,13 +724,13 @@ function Recommendation({ rec }) {
         <span>Priority</span>
         <b>{rec.priority}</b>
       </div>
-      <h4><span>📝</span> Summary</h4>
+      <h4><FileText size={15} /> Summary</h4>
       <p>{rec.summary}</p>
-      <h4><span>🔎</span> Probable causes</h4>
+      <h4><Search size={15} /> Probable causes</h4>
       <ul>{rec.probable_causes.map((c, i) => <li key={i}>{c}</li>)}</ul>
-      <h4><span>🌐</span> Impact</h4>
+      <h4><Globe size={15} /> Impact</h4>
       <p>{rec.impact}</p>
-      <h4><span>🛠️</span> Suggested fixes</h4>
+      <h4><Wrench size={15} /> Suggested fixes</h4>
       <ol>{rec.suggested_fixes.map((f, i) => <li key={i}>{f}</li>)}</ol>
     </div>
   );
@@ -726,13 +748,13 @@ export function AiPage({ anomalies, recs, aiStatus, busyId, topBusy, aiError, on
   return (
     <div>
       <div className="toolbar">
-        {aiStatus && <span className="chip">AI mode: {aiStatus.mode}</span>}
+        {aiStatus && <span className="chip"><Bot size={14} /> AI mode: {aiStatus.mode}</span>}
         <select value={filter} onChange={(e) => { setFilter(e.target.value); setVisible(14); }}>
           <option value="all">All services</option>
           {names.map((n) => <option key={n} value={n}>{n}</option>)}
         </select>
         <button className="primary" disabled={topBusy || anomalies.length === 0} onClick={onRecommendTop}>
-          {topBusy ? "Generating..." : "✨ Generate advice for top 5"}
+          {topBusy ? "Generating..." : <><Sparkles size={16} /> Generate advice for top 5</>}
         </button>
       </div>
 
@@ -778,7 +800,7 @@ export function AiPage({ anomalies, recs, aiStatus, busyId, topBusy, aiError, on
                   <div className="gen-box">
                     <p>The ML model flagged this window. Ask the AI what may have happened and how to fix it.</p>
                     <button className="primary" disabled={busyId === current.id} onClick={() => onRecommend(current.id, false)}>
-                      {busyId === current.id ? "Thinking..." : "✨ Generate AI recommendation"}
+                      {busyId === current.id ? "Thinking..." : <><Sparkles size={16} /> Generate AI recommendation</>}
                     </button>
                   </div>
                 ) : (
@@ -806,14 +828,19 @@ export function AiPage({ anomalies, recs, aiStatus, busyId, topBusy, aiError, on
 /* API Governance                                                      */
 /* ================================================================== */
 const CATEGORY_INFO = {
-  dependency_drift: { label: "Dependency drift", icon: "🕸️", hint: "Calls that differ from the documented architecture" },
-  unused_api: { label: "Unused APIs", icon: "🗑️", hint: "Documented but never called" },
-  broken_api: { label: "Broken APIs", icon: "💥", hint: "Many server errors or 404 responses" },
-  undocumented_api: { label: "Undocumented APIs", icon: "👻", hint: "Called but missing from the catalog" },
-  security: { label: "Security risks", icon: "🔒", hint: "Risk signals found in the traffic" },
-  performance: { label: "Performance", icon: "🐌", hint: "Slow endpoints (p95)" },
+  dependency_drift: { label: "Dependency drift", icon: Network, hint: "Calls that differ from the documented architecture" },
+  unused_api: { label: "Unused APIs", icon: Archive, hint: "Documented but never called" },
+  broken_api: { label: "Broken APIs", icon: ServerCrash, hint: "Many server errors or 404 responses" },
+  undocumented_api: { label: "Undocumented APIs", icon: FileQuestion, hint: "Called but missing from the catalog" },
+  security: { label: "Security risks", icon: Lock, hint: "Risk signals found in the traffic" },
+  performance: { label: "Performance", icon: Gauge, hint: "Slow endpoints (p95)" },
 };
 const CATEGORY_ORDER = Object.keys(CATEGORY_INFO);
+
+function CatIcon({ k, size = 18 }) {
+  const Icon = CATEGORY_INFO[k].icon;
+  return <Icon size={size} />;
+}
 const STATE_ORDER = { Broken: 0, Undocumented: 1, Unused: 2, Active: 3 };
 
 export function timeAgo(iso) {
@@ -1021,7 +1048,7 @@ export function GovernancePage({ status, report, scans, busy, error, onScan, onS
         </ul>
         {error && <div className="notice error">{error}</div>}
         <button className="primary" disabled={busy} onClick={onSeed}>
-          {busy ? "Setting up..." : "✨ Set up demo data and run the first scan"}
+          {busy ? "Setting up..." : <><Sparkles size={16} /> Set up demo data and run the first scan</>}
         </button>
       </Panel>
     );
@@ -1056,7 +1083,7 @@ export function GovernancePage({ status, report, scans, busy, error, onScan, onS
               </div>
             ))}
           </div>
-          <button className="primary" disabled={busy} onClick={onScan}>{busy ? "Scanning..." : "▶ Run scan now"}</button>
+          <button className="primary" disabled={busy} onClick={onScan}>{busy ? "Scanning..." : <><Play size={15} /> Run scan now</>}</button>
         </div>
 
         <div className="panel">
@@ -1070,14 +1097,14 @@ export function GovernancePage({ status, report, scans, busy, error, onScan, onS
 
       <div className="cat-tiles">
         <button className={"cat-tile" + (cat === "all" ? " active" : "")} onClick={() => { setCat("all"); setVisible(8); }}>
-          <span className="cat-icon">📋</span>
+          <span className="cat-icon"><ListChecks size={20} /></span>
           <span className="cat-name">All findings</span>
           <b>{findings.length}</b>
         </button>
         {CATEGORY_ORDER.map((k) => (
           <button key={k} className={"cat-tile" + (cat === k ? " active" : "") + (s.by_category[k] ? "" : " zero")} title={CATEGORY_INFO[k].hint}
             onClick={() => { setCat(cat === k ? "all" : k); setVisible(8); }}>
-            <span className="cat-icon">{CATEGORY_INFO[k].icon}</span>
+            <span className="cat-icon"><CatIcon k={k} size={20} /></span>
             <span className="cat-name">{CATEGORY_INFO[k].label}</span>
             <b>{s.by_category[k] || 0}</b>
           </button>
@@ -1093,7 +1120,7 @@ export function GovernancePage({ status, report, scans, busy, error, onScan, onS
               <div key={f.id} className={"finding sev-" + f.severity}>
                 <div className="finding-head">
                   <span className={"badge " + f.severity}>{f.severity}</span>
-                  <span className="cat-chip">{CATEGORY_INFO[f.category].icon} {CATEGORY_INFO[f.category].label}</span>
+                  <span className="cat-chip"><CatIcon k={f.category} size={14} /> {CATEGORY_INFO[f.category].label}</span>
                   {f.service && <span className="muted small">{f.service}</span>}
                 </div>
                 <div className="finding-title">{f.title}</div>
