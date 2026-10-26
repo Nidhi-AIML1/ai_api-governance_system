@@ -222,123 +222,97 @@ def make_log(service_name: str, service_id: int, caller_id, ts: datetime) -> dic
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def main():
-    parser = argparse.ArgumentParser(description="Generate fake API traffic logs")
-    parser.add_argument("--reset", action="store_true", help="Pehle purane logs delete karo")
-    args = parser.parse_args()
-
-    # Ensure tables exist
+def seed_demo_data(reset: bool = False):
+    """Create the default service topology and traffic if the DB is empty or stale."""
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
     try:
-        # ------------------------------------------------------------------
-        # 1. Register services (idempotent)
-        # ------------------------------------------------------------------
+        existing_services = db.query(Service).count()
+        existing_logs = db.query(ApiLog).count()
+        should_reset = reset or existing_services < len(SERVICES) or existing_logs < 5000
+
+        if should_reset:
+            db.query(ApiLog).delete()
+            db.query(Service).delete()
+            db.commit()
+
         service_ids: dict[str, int] = {}
         for svc in SERVICES:
             existing = db.query(Service).filter_by(name=svc["name"]).first()
             if existing:
                 service_ids[svc["name"]] = existing.id
-                print(f"  [skip] Service already exists: {svc['name']} (id={existing.id})")
             else:
                 obj = Service(**svc)
                 db.add(obj)
-                db.flush()  # id mil jaaye
+                db.flush()
                 service_ids[svc["name"]] = obj.id
-                print(f"  [new]  Registered service: {svc['name']} (id={obj.id})")
         db.commit()
 
-        # ------------------------------------------------------------------
-        # 2. Optionally clear old logs
-        # ------------------------------------------------------------------
-        if args.reset:
-            deleted = db.query(ApiLog).delete()
-            db.commit()
-            print(f"\n  [reset] {deleted} purane logs delete kiye.\n")
+        if should_reset:
+            weighted_services = []
+            for svc_name, weight in RPS_WEIGHT.items():
+                callees = CALL_GRAPH.get(svc_name, [])
+                for _ in range(weight):
+                    weighted_services.append((svc_name, callees))
 
-        # ------------------------------------------------------------------
-        # 3. Build the list of (service_name, caller_id) pairs weighted by RPS
-        # ------------------------------------------------------------------
-        weighted_services = []
-        for svc_name, weight in RPS_WEIGHT.items():
-            callees = CALL_GRAPH.get(svc_name, [])
-            for _ in range(weight):
-                weighted_services.append((svc_name, callees))
+            start_time = NOW_UTC - timedelta(days=7)
+            total_seconds = int(timedelta(days=7).total_seconds())
 
-        # ------------------------------------------------------------------
-        # 4. Generate timestamps spread over last 7 days
-        # ------------------------------------------------------------------
-        start_time = NOW_UTC - timedelta(days=7)
-        total_seconds = int(timedelta(days=7).total_seconds())
-
-        print(f"\nGenerating {TOTAL_LOGS:,} logs over last 7 days …")
-        batch = []
-        for _ in range(TOTAL_LOGS):
-            # Pick a random service
-            svc_name, callees = random.choice(weighted_services)
-            svc_id = service_ids[svc_name]
-
-            # Pick a random caller (may be None)
-            caller_id = None
-            for caller_svc, callee_list in CALL_GRAPH.items():
-                if svc_name in callee_list:
-                    # This service IS called by caller_svc
-                    if random.random() < 0.7:   # 70% chance log has caller info
+            batch = []
+            for _ in range(TOTAL_LOGS):
+                svc_name, _ = random.choice(weighted_services)
+                svc_id = service_ids[svc_name]
+                caller_id = None
+                for caller_svc, callee_list in CALL_GRAPH.items():
+                    if svc_name in callee_list and random.random() < 0.7:
                         caller_id = service_ids[caller_svc]
-                    break
+                        break
 
-            # Random timestamp in the last 7 days
-            offset_s = random.randint(0, total_seconds)
-            ts = start_time + timedelta(seconds=offset_s)
+                offset_s = random.randint(0, total_seconds)
+                ts = start_time + timedelta(seconds=offset_s)
+                batch.append(ApiLog(**make_log(svc_name, svc_id, caller_id, ts)))
 
-            row = make_log(svc_name, svc_id, caller_id, ts)
-            batch.append(ApiLog(**row))
+                if len(batch) >= 500:
+                    db.bulk_save_objects(batch)
+                    db.commit()
+                    batch.clear()
 
-            if len(batch) >= 500:
+            if batch:
                 db.bulk_save_objects(batch)
                 db.commit()
                 batch.clear()
 
-        if batch:
-            db.bulk_save_objects(batch)
-            db.commit()
-            batch.clear()
-
-        # Ensure every injected anomaly window has substantial traffic (>= 40 logs)
-        print("  Injecting targeted traffic into anomaly windows (>= 40 logs per window) ...")
-        for svc_name, (w_start, w_end) in INJECTED_WINDOWS:
-            svc_id = service_ids[svc_name]
-            w_seconds = int((w_end - w_start).total_seconds())
-            for _ in range(45):
-                offset_s = random.randint(0, w_seconds)
-                ts = w_start + timedelta(seconds=offset_s)
-                caller_id = None
-                for caller_svc, callee_list in CALL_GRAPH.items():
-                    if svc_name in callee_list:
-                        if random.random() < 0.7:
+            for svc_name, (w_start, w_end) in INJECTED_WINDOWS:
+                svc_id = service_ids[svc_name]
+                w_seconds = int((w_end - w_start).total_seconds())
+                for _ in range(45):
+                    offset_s = random.randint(0, w_seconds)
+                    ts = w_start + timedelta(seconds=offset_s)
+                    caller_id = None
+                    for caller_svc, callee_list in CALL_GRAPH.items():
+                        if svc_name in callee_list and random.random() < 0.7:
                             caller_id = service_ids[caller_svc]
-                        break
-                row = make_log(svc_name, svc_id, caller_id, ts)
-                batch.append(ApiLog(**row))
+                            break
+                    batch.append(ApiLog(**make_log(svc_name, svc_id, caller_id, ts)))
 
-        if batch:
-            db.bulk_save_objects(batch)
-            db.commit()
-            batch.clear()
+            if batch:
+                db.bulk_save_objects(batch)
+                db.commit()
+                batch.clear()
 
-        print(f"  [OK] Logs insert ho gaye (including guaranteed anomaly traffic)!")
-
-        # ------------------------------------------------------------------
-        # 5. Save anomaly ground truth
-        # ------------------------------------------------------------------
         gt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "anomaly_ground_truth.json")
         with open(gt_path, "w") as f:
             json.dump(ANOMALY_GROUND_TRUTH, f, indent=2)
-        print(f"  [OK] Anomaly ground truth saved: {gt_path}")
-
     finally:
         db.close()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate fake API traffic logs")
+    parser.add_argument("--reset", action="store_true", help="Pehle purane logs delete karo")
+    args = parser.parse_args()
+    seed_demo_data(reset=args.reset)
 
 
 if __name__ == "__main__":

@@ -8,10 +8,16 @@ from database import engine, get_db
 import analytics  # Phase 2 – analytics router
 import graph      # Phase 3 – dependency graph router
 import ml_routes  # Phase 4 – ML anomaly detection router
+from traffic_generator import seed_demo_data
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI-Powered API & Microservice Governance Engine")
+
+
+@app.on_event("startup")
+def ensure_seed_data():
+    seed_demo_data(reset=False)
 
 # Phase 2 – analytics endpoints
 app.include_router(analytics.router)
