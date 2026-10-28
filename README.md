@@ -1,3 +1,4 @@
+
 # AI-Powered API & Microservice Governance Engine
 
 Microservice systems slowly get out of control: dependencies nobody documented, APIs nobody uses, broken or slow
@@ -46,8 +47,10 @@ These numbers come from simulated data, so real traffic will give different numb
 
 ### Option 1: one double-click (Windows)
 
-Double-click `start_all.bat`. It starts the backend and the frontend and opens http://localhost:5173.
-The first run creates the Python environment and installs packages, so it takes a few minutes.
+Double-click `start_all.bat`. It opens separate backend and frontend windows, then opens
+http://127.0.0.1:5173 once the frontend responds. Keep both windows open while using the app.
+On the first run, the backend creates its Python environment and both apps may install dependencies.
+If startup fails, leave the relevant window open and read the displayed error.
 
 ### Option 2: Docker
 
@@ -106,16 +109,15 @@ your key in `ANTHROPIC_API_KEY=`. Never share the key or commit `.env`.
 
 ## Tests
 
-```
 cd backend
 python run_tests.py
-```
+
 
 This runs every file in `backend/tests/` and prints PASS or FAIL for each.
 
 ## Project structure
 
-```
+
 governance-engine/
   backend/            FastAPI app, database, ML, AI, governance, tests
   frontend/           React dashboard (Vite)
@@ -123,7 +125,7 @@ governance-engine/
   start_all.bat       one-click launcher (Windows)
   run_docker.bat      start with Docker
   stop_docker.bat     stop Docker
-```
+
 
 ## Tech stack
 
